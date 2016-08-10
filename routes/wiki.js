@@ -80,7 +80,7 @@ router.get('/:urlTitle', function (req, res, next) {
             if (page === null) {
                 var error = new Error('That page was not found!');
                 error.status = 404;
-                return error;
+                return next(error);
             }
 
             return page.getAuthor()
@@ -109,7 +109,9 @@ router.get('/:urlTitle/similar', function (req, res, next) {
         .then(function (page) {
 
             if (page === null) {
-                return next(new Error('That page was not found!'));
+                var error = new Error('That page was not found!');
+                error.status = 404;
+                throw error;
             }
 
             return page.findSimilar();
@@ -135,7 +137,9 @@ router.get('/:urlTitle/edit', function (req, res, next) {
         .then(function (page) {
 
             if (page === null) {
-                return next(new Error('Page not found. :('));
+                var error = new Error('That page was not found!');
+                error.status = 404;
+                return next(error);
             }
 
             res.render('editpage', {
