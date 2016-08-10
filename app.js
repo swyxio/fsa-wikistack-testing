@@ -29,7 +29,7 @@ app.get('/', function (req, res) {
 
 app.use(function (err, req, res, next) {
     console.error(err);
-    res.status(500).send(err.message);
+    res.status(err.status || 500).send(err.message);
 });
 
 module.exports = app;

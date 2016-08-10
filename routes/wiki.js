@@ -78,7 +78,9 @@ router.get('/:urlTitle', function (req, res, next) {
         .then(function (page) {
 
             if (page === null) {
-                return next(new Error('That page was not found!'));
+                var error = new Error('That page was not found!');
+                error.status = 404;
+                return error;
             }
 
             return page.getAuthor()
