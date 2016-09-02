@@ -15,10 +15,11 @@
     "express": "^4.14.0",
     "marked": "^0.3.6",
     "morgan": "^1.7.0",
+    "nunjucks": "^2.4.2",
+    "nunjucks-autoescape": "^1.0.1",
     "pg": "^6.0.3",
     "pg-hstore": "^2.3.2",
-    "sequelize": "^3.23.6",
-    "swig": "^1.4.2"
+    "sequelize": "^3.23.6"
   },
   "devDependencies": {
     "nodemon": "^1.10.0"
