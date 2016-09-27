@@ -1,5 +1,5 @@
 var express = require('express');
-var swig = require('swig');
+var nunjucks = require('nunjucks');
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
 
@@ -7,10 +7,12 @@ var app = express();
 var wikiRouter = require('./routes/wiki');
 var usersRouter = require('./routes/users');
 
-app.engine('html', swig.renderFile);
-swig.setDefaults({ cache: false });
+var env = nunjucks.configure('views', { noCache: true });
+app.engine('html', nunjucks.render);
 app.set('view engine', 'html');
-app.set('views', __dirname + '/views');
+
+var AutoEscapeExtension = require("nunjucks-autoescape")(nunjucks);
+env.addExtension('AutoEscapeExtension', new AutoEscapeExtension(env));
 
 app.use(morgan('dev'));
 
