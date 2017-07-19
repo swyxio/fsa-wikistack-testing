@@ -52,32 +52,36 @@ var Page = db.define('page', {
             return marked(this.content);
         }
     },
-    classMethods: {
-        findByTag: function (tag) {
-            return Page.findAll({
-                where: {
-                    tags: {
-                        $overlap: [tag]
-                    }
-                }
-            });
-        }
-    },
-    instanceMethods: {
-        findSimilar: function () {
-            return Page.findAll({
-                where: {
-                    tags: {
-                        $overlap: this.tags
-                    },
-                    id: {
-                        $ne: this.id
-                    }
-                }
-            });
-        }
-    }
 });
+
+/**
+ * Class Methods
+ */
+Page.findByTag = function (tag) {
+  return Page.findAll({
+    where: {
+      tags: {
+        $overlap: [tag]
+      }
+    }
+  });
+}
+
+/**
+ * Instance methods
+ */
+Page.prototype.findSimilar = function () {
+  return Page.findAll({
+    where: {
+      tags: {
+        $overlap: this.tags
+      },
+      id: {
+        $ne: this.id
+      }
+    }
+  });
+}
 
 var User = db.define('user', {
     name: {
