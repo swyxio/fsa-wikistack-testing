@@ -1,5 +1,5 @@
 var Sequelize = require('sequelize');
-var db = new Sequelize('postgres://localhost:5432/wikistack');
+var db = new Sequelize('postgres://localhost:5432/wikistack', { logging: false });
 var marked = require('marked');
 
 var Page = db.define('page', {
@@ -35,24 +35,29 @@ var Page = db.define('page', {
             }
 
         }
+    },
+    route: {
+        type: Sequelize.VIRTUAL,
+        get () {
+            return '/wiki/' + this.getDataValue('urlTitle')
+        }
+    },
+    renderedContent: {
+        type: Sequelize.VIRTUAL,
+        get () {
+            return marked(this.getDataValue('content'))
+        }
     }
-}, {
-    hooks: {
-        beforeValidate: function (page) {
-            if (page.title) {
-                page.urlTitle = page.title.replace(/\s+/g, '_').replace(/\W/g, '');
-            }
-        }
-    },
-    getterMethods: {
-        route: function () {
-            return '/wiki/' + this.urlTitle;
-        },
-        renderedContent: function () {
-            return marked(this.content);
-        }
-    },
-});
+})
+
+/**
+ * Hooks
+ */
+Page.beforeValidate(function (page) {
+  if (page.title) {
+    page.urlTitle = page.title.replace(/\s+/g, '_').replace(/\W/g, '');
+  }
+})
 
 /**
  * Class Methods
