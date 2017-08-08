@@ -11,7 +11,7 @@ beforeEach(function (done) {
     Page.sync({force: true}).then(() => {
       page = Page.build({
             title: 'page 1',
-            content: 'content 1',
+            content: '# content 1',
             status: 'open',
             tags: ['foo, bar'],
         });
@@ -32,7 +32,7 @@ beforeEach(function (done) {
             return Page.create({
                 title: 'foo3',
                 content: 'bar3',
-                tags: ['foo', 'bar']
+                tags: ['foo', 'bar2']
             })
         }).then(() => {
             return Page.create({
@@ -63,7 +63,9 @@ describe('Page model', function () {
       });
     });
     describe('renderedContent', function () {
-      it('converts the markdown-formatted content into HTML');
+      it('converts the markdown-formatted content into HTML', () => {
+        expect(page.renderedContent).to.equal('<h1 id="content-1">content 1</h1>\n')
+      });
     });
   });
 
@@ -85,7 +87,7 @@ describe('Page model', function () {
 
     describe('findByTag', function () {
       it('gets pages with the search tag', (done) => {
-          Page.findByTag('bar').then(result => {
+          Page.findByTag('foo').then(result => {
               expect(result).to.be.an('array')
               expect(result).to.have.lengthOf(3);
               done()
@@ -123,21 +125,95 @@ describe('Page model', function () {
         //     .catch(done)
         // })
       });
-      it('gets other pages with any common tags', function(){
-
+      it('gets other pages with any common tags', async function(){
+        var foo1page = await Page.findOne({where: {title: 'foo1'}})
+        // var similarResults = await Page.findOne({where: {title: 'foo3'}}).findSimilar() // intentionally fail
+        var similarResults = await foo1page.findSimilar()
+        similarResults.forEach(result => {
+          expect(foo1page.tags.some(v => result.tags.includes(v))).equals(true)  
+        })
       });
-      it('does not get other pages without any common tags');
+      it('does not get other pages without any common tags', async function () {
+        var foo4page = await Page.findOne({where: {title: 'foo4'}})
+        var foo1page = await Page.findOne({where: {title: 'foo1'}})
+        var similarResults = await foo1page.findSimilar()
+        similarResults.forEach(result => {
+          expect(foo4page.tags.some(v => result.tags.includes(v))).equals(false)  
+        })
+      });
     });
   });
 
+var page2
+
   describe('Validations', function () {
-    it('errors without title');
-    it('errors without content');
-    it('errors given an invalid status');
+    beforeEach(function () {
+      page2 = Page.build({
+              title: 'title 1',
+              content: 'content 1',
+              status: 'open',
+              tags: ['foo, bar'],
+          });
+    })
+    it('errors without title', function (done) {
+      page2.validate()
+      .then(function (err) {
+        done();
+      })
+      .catch(function (err) {
+        expect(err).to.exist;
+        expect(err.errors).to.exist;
+        expect(err.errors[0].path).to.equal('title');
+        done()
+      })
+    });
+    it('errors without content', function (done) {
+      page2.validate()
+      .then(function (err) {
+        done();
+      })
+      .catch(function (err) {
+        expect(err).to.exist;
+        expect(err.errors).to.exist;
+        expect(err.errors[0].path).to.equal('content');
+        done()
+      })
+    });
+    it('errors given an invalid status', (done) => {
+      page2.validate()
+      .then(function () {
+        done();
+      })
+      .catch(function (err) {
+        expect(err).to.exist;
+        expect(err.errors).to.exist;
+        expect(err.errors[0].path).to.equal('status');
+        done()
+      })
+
+    });
   });
 
+  var page3;
+
   describe('Hooks', function () {
-    it('it sets urlTitle based on title before validating');
+      beforeEach(function () {
+        page3 = Page.build({
+                title: 'title 1',
+                content: 'content 1',
+                status: 'open',
+                tags: ['foo, bar'],
+          });
+        })
+    it('it sets urlTitle based on title before validating', function (done) {
+      page3.validate()
+      .then(
+        function(result){
+          expect(result.urlTitle).to.equal('title_1');
+          done();
+        }
+      ).catch(done)
+    });
   });
 
 });
